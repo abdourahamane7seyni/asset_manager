@@ -1,0 +1,108 @@
+<% content_for :page_title, "Mon Profil" %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h4 class="fw-bold mb-1">Mon Profil</h4>
+    <p class="text-muted mb-0">Gérer vos informations de connexion</p>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-4">
+    <div class="card p-4 text-center">
+      <div class="stat-icon mx-auto mb-3" style="background: linear-gradient(135deg, #0d6efd, #0f3460); color:white; width:80px; height:80px; font-size:2rem; border-radius:50%;">
+        <i class="bi bi-person"></i>
+      </div>
+      <h5 class="fw-bold mb-1"><%= current_user.email.split("@").first %></h5>
+      <p class="text-muted small mb-3"><%= current_user.email %></p>
+      <span class="badge bg-primary rounded-pill px-3 py-2">Administrateur</span>
+      <hr class="my-3">
+      <div class="text-start">
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted small">Membre depuis</span>
+          <span class="small fw-semibold"><%= current_user.created_at.strftime("%d/%m/%Y") %></span>
+        </div>
+        <div class="d-flex justify-content-between">
+          <span class="text-muted small">Dernière connexion</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-8">
+    <!-- Changer email -->
+    <div class="card p-4 mb-4">
+      <h6 class="fw-bold mb-4 text-muted text-uppercase" style="font-size:0.8rem;">
+        <i class="bi bi-envelope me-2"></i>Changer l'email
+      </h6>
+      <% if notice %>
+        <div class="alert alert-success rounded-3"><i class="bi bi-check-circle me-2"></i><%= notice %></div>
+      <% end %>
+      <% if current_user.errors.any? %>
+        <div class="alert alert-danger rounded-3">
+          <% current_user.errors.full_messages.each do |msg| %>
+            <div><i class="bi bi-exclamation-circle me-2"></i><%= msg %></div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <form action="/profile" method="post" data-turbo="false">
+        <input type="hidden" name="_method" value="patch">
+        <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Nouvel email</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="bi bi-envelope text-muted"></i></span>
+            <input type="email" name="user[email]" class="form-control" value="<%= current_user.email %>">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Mot de passe actuel <span class="text-danger">*</span></label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="bi bi-lock text-muted"></i></span>
+            <input type="password" name="user[current_password]" class="form-control" placeholder="Requis pour confirmer">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary px-4" style="border-radius:8px;">
+          <i class="bi bi-check-lg me-1"></i> Mettre à jour l'email
+        </button>
+      </form>
+    </div>
+
+    <!-- Changer mot de passe -->
+    <div class="card p-4">
+      <h6 class="fw-bold mb-4 text-muted text-uppercase" style="font-size:0.8rem;">
+        <i class="bi bi-lock me-2"></i>Changer le mot de passe
+      </h6>
+      <form action="/profile" method="post" data-turbo="false">
+        <input type="hidden" name="_method" value="patch">
+        <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+        <input type="hidden" name="user[email]" value="<%= current_user.email %>">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Mot de passe actuel <span class="text-danger">*</span></label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="bi bi-lock text-muted"></i></span>
+            <input type="password" name="user[current_password]" class="form-control" placeholder="Mot de passe actuel">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Nouveau mot de passe</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="bi bi-lock-fill text-muted"></i></span>
+            <input type="password" name="user[password]" class="form-control" placeholder="Min. 6 caractères">
+          </div>
+        </div>
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Confirmer le nouveau mot de passe</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="bi bi-lock-fill text-muted"></i></span>
+            <input type="password" name="user[password_confirmation]" class="form-control" placeholder="Répétez le mot de passe">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-warning px-4" style="border-radius:8px;">
+          <i class="bi bi-shield-lock me-1"></i> Changer le mot de passe
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,175 @@
+<% content_for :page_title, "Mouvement ##{@movement.id}" %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div class="d-flex align-items-center gap-3">
+    <% color_bg = case @movement.action
+      when "Assignation" then "#dcfce7"
+      when "Retour" then "#dbeafe"
+      when "Transfert" then "#fef9c3"
+      when "Maintenance" then "#fee2e2"
+      else "#f3f4f6"
+      end %>
+    <% color_text = case @movement.action
+      when "Assignation" then "#16a34a"
+      when "Retour" then "#2563eb"
+      when "Transfert" then "#ca8a04"
+      when "Maintenance" then "#dc2626"
+      else "#374151"
+      end %>
+    <div class="stat-icon" style="background:<%= color_bg %>; color:<%= color_text %>; width:50px; height:50px; font-size:1.3rem; border-radius:12px;">
+      <% icon = case @movement.action
+        when "Assignation" then "bi-person-check"
+        when "Retour" then "bi-arrow-return-left"
+        when "Transfert" then "bi-arrow-left-right"
+        when "Maintenance" then "bi-tools"
+        else "bi-arrow-left-right"
+        end %>
+      <i class="bi <%= icon %>"></i>
+    </div>
+    <div>
+      <h4 class="fw-bold mb-0">Mouvement #<%= @movement.id %></h4>
+      <span class="badge badge-status" style="background:<%= color_bg %>; color:<%= color_text %>;"><%= @movement.action %></span>
+    </div>
+  </div>
+  <div class="d-flex gap-2">
+    <%= link_to edit_movement_path(@movement), class: "btn btn-outline-secondary" do %>
+      <i class="bi bi-pencil"></i> Modifier
+    <% end %>
+    <%= link_to @movement, data: { turbo_method: :delete, turbo_confirm: "Supprimer ce mouvement ?" }, class: "btn btn-outline-danger" do %>
+      <i class="bi bi-trash"></i> Supprimer
+    <% end %>
+    <%= link_to movements_path, class: "btn btn-outline-primary" do %>
+      <i class="bi bi-arrow-left"></i> Retour
+    <% end %>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-8">
+    <div class="card p-4 mb-4">
+      <h6 class="fw-bold text-muted text-uppercase mb-4" style="font-size:0.75rem; letter-spacing:1px;">
+        <i class="bi bi-info-circle me-2"></i>Détails du mouvement
+      </h6>
+      <div class="row g-4">
+        <!-- Matériel -->
+        <div class="col-md-6">
+          <label class="text-muted d-block" style="font-size:0.78rem;">Matériel</label>
+          <div class="d-flex align-items-center gap-2 mt-2">
+            <div class="stat-icon" style="background:#dcfce7; color:#16a34a; width:38px; height:38px; font-size:0.9rem; border-radius:10px; flex-shrink:0;">
+              <i class="bi bi-laptop"></i>
+            </div>
+            <div>
+              <p class="fw-semibold mb-0" style="font-size:0.9rem;"><%= @movement.materiel&.nom %></p>
+              <small class="text-muted"><%= @movement.materiel&.type_materiel %></small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Employé -->
+        <div class="col-md-6">
+          <label class="text-muted d-block" style="font-size:0.78rem;">Employé</label>
+          <div class="d-flex align-items-center gap-2 mt-2">
+            <div style="width:38px; height:38px; background:#dbeafe; color:#2563eb; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0;">
+              <%= @movement.employee&.first_name&.first&.upcase %>
+            </div>
+            <div>
+              <p class="fw-semibold mb-0" style="font-size:0.9rem;"><%= @movement.employee&.first_name %> <%= @movement.employee&.last_name %></p>
+              <small class="text-muted"><%= @movement.employee&.department %></small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action -->
+        <div class="col-md-6">
+          <label class="text-muted d-block" style="font-size:0.78rem;">Action</label>
+          <% color = case @movement.action
+            when "Assignation" then "success"
+            when "Retour" then "primary"
+            when "Transfert" then "warning"
+            when "Maintenance" then "danger"
+            else "secondary"
+            end %>
+          <span class="badge bg-<%= color %> badge-status mt-1"><%= @movement.action %></span>
+        </div>
+
+        <!-- Date -->
+        <div class="col-md-6">
+          <label class="text-muted d-block" style="font-size:0.78rem;">Date</label>
+          <p class="fw-semibold mb-0 mt-1">
+            <i class="bi bi-calendar3 text-muted me-2"></i>
+            <%= @movement.date.present? ? @movement.date.strftime("%d/%m/%Y") : "—" %>
+          </p>
+        </div>
+
+        <!-- Notes -->
+        <% if @movement.notes.present? %>
+          <div class="col-12">
+            <label class="text-muted d-block" style="font-size:0.78rem;">Notes</label>
+            <p class="mb-0 mt-1 p-3 rounded-3" style="background:#f8f9fa; font-size:0.9rem;"><%= @movement.notes %></p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="card p-4">
+      <h6 class="fw-bold text-muted text-uppercase mb-4" style="font-size:0.75rem; letter-spacing:1px;">
+        <i class="bi bi-clock-history me-2"></i>Autres mouvements de ce matériel
+      </h6>
+      <% autres = @movement.materiel&.movements&.where&.not(id: @movement.id)&.order(date: :desc)&.limit(5) %>
+      <% if autres&.any? %>
+        <% autres.each do |m| %>
+          <div class="d-flex align-items-center gap-3 mb-3 p-3 rounded-3" style="background:#f8f9fa;">
+            <% c = case m.action
+              when "Assignation" then ["#dcfce7", "#16a34a", "bi-person-check"]
+              when "Retour" then ["#dbeafe", "#2563eb", "bi-arrow-return-left"]
+              when "Transfert" then ["#fef9c3", "#ca8a04", "bi-arrow-left-right"]
+              when "Maintenance" then ["#fee2e2", "#dc2626", "bi-tools"]
+              else ["#f3f4f6", "#374151", "bi-arrow-left-right"]
+              end %>
+            <div class="stat-icon" style="background:<%= c[0] %>; color:<%= c[1] %>; width:36px; height:36px; font-size:0.85rem; border-radius:8px; flex-shrink:0;">
+              <i class="bi <%= c[2] %>"></i>
+            </div>
+            <div class="flex-grow-1">
+              <p class="mb-0 fw-semibold" style="font-size:0.88rem;"><%= m.action %> — <%= m.employee&.first_name %> <%= m.employee&.last_name %></p>
+              <small class="text-muted"><%= m.date&.strftime("%d/%m/%Y") %></small>
+            </div>
+            <%= link_to m, class: "btn btn-sm btn-outline-secondary" do %>
+              <i class="bi bi-eye"></i>
+            <% end %>
+          </div>
+        <% end %>
+      <% else %>
+        <p class="text-muted text-center py-3">Aucun autre mouvement pour ce matériel</p>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <!-- Actions rapides -->
+    <div class="card p-4">
+      <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size:0.75rem; letter-spacing:1px;">
+        <i class="bi bi-lightning me-2"></i>Actions rapides
+      </h6>
+      <%= link_to new_movement_path, class: "btn btn-primary w-100 mb-2" do %>
+        <i class="bi bi-plus-lg me-2"></i>Nouveau mouvement
+      <% end %>
+      <% if @movement.materiel %>
+        <%= link_to @movement.materiel, class: "btn btn-outline-success w-100 mb-2" do %>
+          <i class="bi bi-laptop me-2"></i>Voir le matériel
+        <% end %>
+      <% end %>
+      <% if @movement.employee %>
+        <%= link_to @movement.employee, class: "btn btn-outline-primary w-100 mb-2" do %>
+          <i class="bi bi-person me-2"></i>Voir l'employé
+        <% end %>
+      <% end %>
+      <%= link_to edit_movement_path(@movement), class: "btn btn-outline-secondary w-100 mb-2" do %>
+        <i class="bi bi-pencil me-2"></i>Modifier
+      <% end %>
+      <%= link_to movements_path, class: "btn btn-outline-dark w-100" do %>
+        <i class="bi bi-arrow-left me-2"></i>Retour à la liste
+      <% end %>
+    </div>
+  </div>
+</div>

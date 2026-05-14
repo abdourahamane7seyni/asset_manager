@@ -1,0 +1,117 @@
+<div class="card p-4">
+  <%= form_with(model: materiel, data: { turbo: false }) do |form| %>
+    <% if materiel.errors.any? %>
+      <div class="alert alert-danger">
+        <% materiel.errors.full_messages.each do |msg| %>
+          <div><i class="bi bi-exclamation-circle me-2"></i><%= msg %></div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <!-- Section 1: Informations générales -->
+    <div class="mb-4">
+      <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size:0.75rem; letter-spacing:1px;">
+        <i class="bi bi-info-circle me-2"></i>Informations générales
+      </h6>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Nom du matériel <span class="text-danger">*</span></label>
+          <%= form.text_field :nom, class: "form-control", placeholder: "Ex: Dell Latitude 5520" %>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Type de matériel <span class="text-danger">*</span></label>
+          <%= form.select :type_materiel, [
+            "Ordinateurs / Laptops", "Serveurs", "Téléphones / Mobile",
+            "Réseau (switch, routeur)", "Licences logicielles", "Imprimantes"
+          ], { include_blank: "-- Sélectionner --" }, class: "form-select" %>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Marque</label>
+          <%= form.text_field :marque, class: "form-control", placeholder: "Ex: Dell, HP, Apple..." %>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Modèle</label>
+          <%= form.text_field :modele, class: "form-control", placeholder: "Ex: Latitude 5520" %>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Numéro de série</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-upc text-muted"></i></span>
+            <%= form.text_field :numero_serie, class: "form-control", placeholder: "Ex: SN-123456789" %>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Statut <span class="text-danger">*</span></label>
+          <%= form.select :statut, [
+            "En service", "En stock", "En maintenance", "Hors service"
+          ], { include_blank: "-- Sélectionner --" }, class: "form-select" %>
+        </div>
+      </div>
+    </div>
+
+    <hr class="my-4">
+
+    <!-- Section 2: Localisation & Assignation -->
+    <div class="mb-4">
+      <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size:0.75rem; letter-spacing:1px;">
+        <i class="bi bi-geo-alt me-2"></i>Localisation & Assignation
+      </h6>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Assigné à</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-person text-muted"></i></span>
+            <%= form.text_field :assigne_a, class: "form-control", placeholder: "Nom de l'employé" %>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Localisation</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-geo-alt text-muted"></i></span>
+            <%= form.text_field :localisation, class: "form-control", placeholder: "Ex: Bureau 2, Salle serveur..." %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="my-4">
+
+    <!-- Section 3: Dates -->
+    <div class="mb-4">
+      <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size:0.75rem; letter-spacing:1px;">
+        <i class="bi bi-calendar me-2"></i>Dates
+      </h6>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Date d'achat</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-calendar3 text-muted"></i></span>
+            <%= form.date_field :date_achat, class: "form-control" %>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Expiration garantie</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-shield-check text-muted"></i></span>
+            <%= form.date_field :expiration_garantie, class: "form-control" %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="my-4">
+
+    <!-- Section 4: Notes -->
+    <div class="mb-4">
+      <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size:0.75rem; letter-spacing:1px;">
+        <i class="bi bi-sticky me-2"></i>Notes
+      </h6>
+      <%= form.text_area :notes, class: "form-control", rows: 4, placeholder: "Informations supplémentaires, observations..." %>
+    </div>
+
+    <div class="d-flex gap-2 pt-2">
+      <%= form.submit "Enregistrer", class: "btn btn-primary px-4" %>
+      <%= link_to "Annuler", materiels_path, class: "btn btn-outline-secondary px-4" %>
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,15 @@
+wb = xlsx_package.workbook
+wb.add_worksheet(name: "Employés") do |sheet|
+  sheet.add_row ["Prénom", "Nom", "Email", "Département", "Téléphone", "Matériels assignés"],
+    style: sheet.styles.add_style(bg_color: "16A34A", fg_color: "FFFFFF", b: true, sz: 11)
+  @employees.each do |e|
+    sheet.add_row [
+      e.first_name,
+      e.last_name,
+      e.email,
+      e.department,
+      e.phone,
+      e.movements.where(action: "Assignation").count
+    ]
+  end
+end

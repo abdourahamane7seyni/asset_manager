@@ -1,0 +1,19 @@
+wb = xlsx_package.workbook
+wb.add_worksheet(name: "Matériels") do |sheet|
+  sheet.add_row ["Nom", "Type", "Marque", "Modèle", "N° Série", "Statut", "Assigné à", "Localisation", "Date achat", "Expiration garantie"],
+    style: sheet.styles.add_style(bg_color: "0D6EFD", fg_color: "FFFFFF", b: true, sz: 11)
+  @materiels.each do |m|
+    sheet.add_row [
+      m.nom,
+      m.type_materiel,
+      m.marque,
+      m.modele,
+      m.numero_serie,
+      m.statut,
+      m.assigne_a,
+      m.localisation,
+      m.date_achat&.strftime("%d/%m/%Y"),
+      m.expiration_garantie&.strftime("%d/%m/%Y")
+    ]
+  end
+end

@@ -1,0 +1,199 @@
+<% content_for :page_title, @materiel.nom %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <div class="d-flex align-items-center gap-3">
+      <div class="stat-icon" style="background:#dcfce7; color:#16a34a; width:50px; height:50px; font-size:1.3rem; border-radius:12px;">
+        <% icon = case @materiel.type_materiel
+          when "Ordinateurs / Laptops" then "bi-laptop"
+          when "Serveurs" then "bi-server"
+          when "Téléphones / Mobile" then "bi-phone"
+          when "Réseau (switch, routeur)" then "bi-router"
+          when "Licences logicielles" then "bi-key"
+          when "Imprimantes" then "bi-printer"
+          else "bi-pc"
+          end %>
+        <i class="bi <%= icon %>"></i>
+      </div>
+      <div>
+        <h4 class="fw-bold mb-0"><%= @materiel.nom %></h4>
+        <small class="text-muted"><%= @materiel.marque %> <%= @materiel.modele %></small>
+      </div>
+    </div>
+  </div>
+  <div class="d-flex gap-2">
+    <%= link_to edit_materiel_path(@materiel), class: "btn btn-outline-secondary" do %>
+      <i class="bi bi-pencil"></i> Modifier
+    <% end %>
+    <%= link_to @materiel, data: { turbo_method: :delete, turbo_confirm: "Supprimer ce matériel ?" }, class: "btn btn-outline-danger" do %>
+      <i class="bi bi-trash"></i> Supprimer
+    <% end %>
+    <%= link_to materiels_path, class: "btn btn-outline-primary" do %>
+      <i class="bi bi-arrow-left"></i> Retour
+    <% end %>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-8">
+    <!-- Informations générales -->
+    <div class="card p-4 mb-4">
+      <h6 class="fw-bold text-muted text-uppercase mb-4" style="font-size:0.75rem; letter-spacing:1px;">
+        <i class="bi bi-info-circle me-2"></i>Informations générales
+      </h6>
+      <div class="row g-4">
+        <div class="col-md-6">
+          <label class="text-muted d-block" style="font-size:0.78rem;">Type</label>
+          <span class="badge rounded-pill bg-light text-dark border mt-1"><%= @materiel.type_materiel %></span>
+        </div>
+        <div class="col-md-6">
+          <label class="text-muted d-block" style="font-size:0.78rem;">Statut</label>
+          <% color = case @materiel.statut
+            when "En service" then "success"
+            when "En stock" then "primary"
+            when "En maintenance" then "warning"
+            when "Hors service" then "danger"
+            else "secondary"
+            end %>
+          <span class="badge bg-<%= color %> badge-status mt-1"><%= @materiel.statut %></span>
+        </div>
+        <div class="col-md-6">
+          <label class="text-muted d-block" style="font-size:0.78rem;">Marque</label>
+          <p class="fw-semibold mb-0"><%= @materiel.marque.present? ? @materiel.marque : "—" %></p>
+        </div>
+        <div class="col-md-6">
+          <label class="text-muted d-block" style="font-size:0.78rem;">Modèle</label>
+          <p class="fw-semibold mb-0"><%= @materiel.modele.present? ? @materiel.modele : "—" %></p>
+        </div>
+        <div class="col-md-6">
+          <label class="text-muted d-block" style="font-size:0.78rem;">Numéro de série</label>
+          <code><%= @materiel.numero_serie.present? ? @materiel.numero_serie : "—" %></code>
+        </div>
+        <div class="col-md-6">
+          <label class="text-muted d-block" style="font-size:0.78rem;">Localisation</label>
+          <p class="fw-semibold mb-0"><i class="bi bi-geo-alt text-muted me-1"></i><%= @materiel.localisation.present? ? @materiel.localisation : "—" %></p>
+        </div>
+        <div class="col-md-6">
+          <label class="text-muted d-block" style="font-size:0.78rem;">Assigné à</label>
+          <% if @materiel.assigne_a.present? %>
+            <div class="d-flex align-items-center gap-2 mt-1">
+              <div style="width:28px; height:28px; background:#dbeafe; color:#2563eb; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:600;">
+                <%= @materiel.assigne_a.first.upcase %>
+              </div>
+              <span class="fw-semibold"><%= @materiel.assigne_a %></span>
+            </div>
+          <% else %>
+            <span class="text-muted">—</span>
+          <% end %>
+        </div>
+        <div class="col-md-6">
+          <label class="text-muted d-block" style="font-size:0.78rem;">Date d'achat</label>
+          <p class="fw-semibold mb-0"><i class="bi bi-calendar3 text-muted me-1"></i><%= @materiel.date_achat.present? ? @materiel.date_achat.strftime("%d/%m/%Y") : "—" %></p>
+        </div>
+        <% if @materiel.notes.present? %>
+          <div class="col-12">
+            <label class="text-muted d-block" style="font-size:0.78rem;">Notes</label>
+            <p class="mb-0 mt-1 p-3 rounded-3" style="background:#f8f9fa; font-size:0.9rem;"><%= @materiel.notes %></p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Historique des mouvements -->
+    <div class="card">
+      <div class="d-flex justify-content-between align-items-center p-4 border-bottom">
+        <h6 class="fw-bold mb-0"><i class="bi bi-clock-history me-2"></i>Historique des mouvements</h6>
+        <span class="badge bg-light text-dark"><%= @materiel.movements.count %></span>
+      </div>
+      <div class="card-body p-0">
+        <table class="table mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">Date</th>
+              <th>Employé</th>
+              <th>Action</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @materiel.movements.order(date: :desc).each do |m| %>
+              <tr>
+                <td class="ps-4"><small><%= m.date&.strftime("%d/%m/%Y") %></small></td>
+                <td><%= m.employee&.first_name %> <%= m.employee&.last_name %></td>
+                <td>
+                  <% color = case m.action
+                    when "Assignation" then "success"
+                    when "Retour" then "primary"
+                    when "Transfert" then "warning"
+                    when "Maintenance" then "danger"
+                    else "secondary"
+                    end %>
+                  <span class="badge bg-<%= color %> badge-status"><%= m.action %></span>
+                </td>
+                <td><small class="text-muted"><%= m.notes.present? ? m.notes : "—" %></small></td>
+              </tr>
+            <% end %>
+            <% if @materiel.movements.empty? %>
+              <tr><td colspan="4" class="text-center text-muted py-4">Aucun mouvement enregistré</td></tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <!-- Garantie -->
+    <div class="card p-4 mb-4">
+      <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size:0.75rem; letter-spacing:1px;">
+        <i class="bi bi-shield-check me-2"></i>Garantie
+      </h6>
+      <% if @materiel.expiration_garantie.present? %>
+        <% days_left = (@materiel.expiration_garantie - Date.today).to_i %>
+        <% if @materiel.expiration_garantie < Date.today %>
+          <div class="p-3 rounded-3 text-center" style="background:#fee2e2;">
+            <i class="bi bi-x-circle-fill text-danger" style="font-size:2rem;"></i>
+            <p class="fw-bold text-danger mb-0 mt-2">Garantie expirée</p>
+            <small class="text-danger">depuis <%= days_left.abs %> jours</small>
+          </div>
+        <% elsif @materiel.expiration_garantie < 30.days.from_now %>
+          <div class="p-3 rounded-3 text-center" style="background:#fef9c3;">
+            <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size:2rem;"></i>
+            <p class="fw-bold text-warning mb-0 mt-2">Expire bientôt</p>
+            <small class="text-warning">dans <%= days_left %> jours</small>
+          </div>
+        <% else %>
+          <div class="p-3 rounded-3 text-center" style="background:#dcfce7;">
+            <i class="bi bi-shield-check text-success" style="font-size:2rem;"></i>
+            <p class="fw-bold text-success mb-0 mt-2">Garantie valide</p>
+            <small class="text-success">encore <%= days_left %> jours</small>
+          </div>
+        <% end %>
+        <p class="text-center text-muted mt-2 mb-0" style="font-size:0.85rem;">
+          Expire le <strong><%= @materiel.expiration_garantie.strftime("%d/%m/%Y") %></strong>
+        </p>
+      <% else %>
+        <p class="text-muted text-center py-3">Aucune information de garantie</p>
+      <% end %>
+    </div>
+
+    <!-- Actions rapides -->
+    <div class="card p-4">
+      <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size:0.75rem; letter-spacing:1px;">
+        <i class="bi bi-lightning me-2"></i>Actions rapides
+      </h6>
+      <%= link_to new_movement_path, class: "btn btn-primary w-100 mb-2" do %>
+        <i class="bi bi-arrow-left-right me-2"></i>Enregistrer un mouvement
+      <% end %>
+      <%= link_to edit_materiel_path(@materiel), class: "btn btn-outline-secondary w-100 mb-2" do %>
+        <i class="bi bi-pencil me-2"></i>Modifier ce matériel
+      <% end %>
+      <%= link_to materiels_path, class: "btn btn-outline-primary w-100" do %>
+        <i class="bi bi-arrow-left me-2"></i>Retour à la liste
+      <% end %>
+      <%= link_to qrcode_materiel_path(@materiel), class: "btn btn-outline-dark w-100 mb-2", target: "_blank" do %>
+        <i class="bi bi-qr-code me-2"></i>Voir le QR Code
+      <% end %>
+    </div>
+  </div>
+</div>

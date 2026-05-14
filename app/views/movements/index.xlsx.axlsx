@@ -1,0 +1,16 @@
+wb = xlsx_package.workbook
+wb.add_worksheet(name: "Mouvements") do |sheet|
+  sheet.add_row ["Date", "Matériel", "Type", "Employé", "Département", "Action", "Notes"],
+    style: sheet.styles.add_style(bg_color: "16A34A", fg_color: "FFFFFF", b: true, sz: 11)
+  @movements.each do |m|
+    sheet.add_row [
+      m.date&.strftime("%d/%m/%Y"),
+      m.materiel&.nom,
+      m.materiel&.type_materiel,
+      "#{m.employee&.first_name} #{m.employee&.last_name}",
+      m.employee&.department,
+      m.action,
+      m.notes
+    ]
+  end
+end

@@ -1,0 +1,13 @@
+<% content_for :page_title, "Nouveau Mouvement" %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h4 class="fw-bold mb-1">Nouveau Mouvement</h4>
+    <p class="text-muted mb-0">Enregistrer un transfert ou une assignation</p>
+  </div>
+  <%= link_to movements_path, class: "btn btn-outline-secondary" do %>
+    <i class="bi bi-arrow-left"></i> Retour
+  <% end %>
+</div>
+
+<%= render "form", movement: @movement %>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; color: #333; margin: 0; padding: 0; }
+    .header { background: #16a34a; color: white; padding: 30px; text-align: center; }
+    .content { padding: 30px; }
+    .info-box { background: #f0fdf4; border-left: 4px solid #16a34a; padding: 15px; margin: 20px 0; border-radius: 4px; }
+    .footer { background: #f8f9fa; padding: 20px; text-align: center; color: #666; font-size: 12px; }
+    .btn { background: #16a34a; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; margin: 20px 0; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    th { background: #16a34a; color: white; padding: 10px; text-align: left; }
+    td { padding: 8px 10px; border-bottom: 1px solid #eee; }
+    tr:nth-child(even) { background: #f0fdf4; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1 style="margin:0; font-size:22px;">📋 Décharge de Matériel Informatique</h1>
+    <p style="margin:5px 0 0;">Asset Manager</p>
+  </div>
+
+  <div class="content">
+    <p>Bonjour <strong><%= @employee.first_name %> <%= @employee.last_name %></strong>,</p>
+
+    <p>Veuillez trouver ci-joint votre décharge de matériel informatique. Ce document récapitule l'ensemble des équipements qui vous ont été assignés.</p>
+
+    <div class="info-box">
+      <strong>📌 Vos informations</strong><br>
+      Nom : <%= @employee.first_name %> <%= @employee.last_name %><br>
+      Département : <%= @employee.department %><br>
+      Email : <%= @employee.email %><br>
+      Date d'émission : <%= @decharge.date_emission&.strftime('%d/%m/%Y') %>
+    </div>
+
+    <h3 style="color:#16a34a;">📦 Matériels assignés</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nom</th>
+          <th>Type</th>
+          <th>N° Série</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @materiels.each_with_index do |m, i| %>
+          <tr>
+            <td><%= i + 1 %></td>
+            <td><%= m.materiel&.nom %></td>
+            <td><%= m.materiel&.type_materiel %></td>
+            <td><code><%= m.materiel&.numero_serie %></code></td>
+            <td><%= m.date&.strftime("%d/%m/%Y") %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <p>⚠️ <strong>Important :</strong> Veuillez imprimer ce document, le signer et le remettre au service informatique.</p>
+
+    <p>Cordialement,<br><strong>Le Service Informatique</strong></p>
+  </div>
+
+  <div class="footer">
+    <p>Ce message est généré automatiquement par Asset Manager. Merci de ne pas y répondre.</p>
+    <p>© <%= Date.today.year %> Asset Manager — Confidentiel</p>
+  </div>
+</body>
+</html>

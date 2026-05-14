@@ -1,0 +1,215 @@
+<% content_for :page_title, "Matériels" %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h4 class="fw-bold mb-1">Gestion des Matériels</h4>
+    <p class="text-muted mb-0" style="font-size:0.88rem;">Liste de tous les équipements informatiques</p>
+  </div>
+  <div class="d-flex gap-2">
+    <%= link_to materiels_path(format: :pdf), class: "btn btn-outline-danger" do %>
+      <i class="bi bi-file-pdf"></i> PDF
+    <% end %>
+    <%= link_to materiels_path(format: :xlsx), class: "btn btn-outline-success" do %>
+      <i class="bi bi-file-excel"></i> Excel
+    <% end %>
+    <%= link_to "/materiels/new", class: "btn btn-primary" do %>
+      <i class="bi bi-plus-lg"></i> Nouveau
+    <% end %>
+  </div>
+</div>
+
+<!-- Stats rapides -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card p-3 text-center border-0" style="background:#dcfce7;">
+      <h4 class="fw-bold mb-0" style="color:#16a34a;"><%= @materiels.where(statut: "En service").count %></h4>
+      <small style="color:#16a34a;">En service</small>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card p-3 text-center border-0" style="background:#dbeafe;">
+      <h4 class="fw-bold mb-0" style="color:#2563eb;"><%= @materiels.where(statut: "En stock").count %></h4>
+      <small style="color:#2563eb;">En stock</small>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card p-3 text-center border-0" style="background:#fef9c3;">
+      <h4 class="fw-bold mb-0" style="color:#ca8a04;"><%= @materiels.where(statut: "En maintenance").count %></h4>
+      <small style="color:#ca8a04;">En maintenance</small>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card p-3 text-center border-0" style="background:#fee2e2;">
+      <h4 class="fw-bold mb-0" style="color:#dc2626;"><%= @materiels.where(statut: "Hors service").count %></h4>
+      <small style="color:#dc2626;">Hors service</small>
+    </div>
+  </div>
+</div>
+
+<!-- Filtres -->
+<div class="card mb-4 p-3">
+  <div class="row g-2 align-items-center">
+    <div class="col-md-4">
+      <div class="input-group">
+        <span class="input-group-text"><i class="bi bi-search text-muted"></i></span>
+        <input type="text" id="searchInput" class="form-control" placeholder="Rechercher un matériel...">
+      </div>
+    </div>
+    <div class="col-md-3">
+      <select id="typeFilter" class="form-select">
+        <option value="">Tous les types</option>
+        <option>Ordinateurs / Laptops</option>
+        <option>Serveurs</option>
+        <option>Téléphones / Mobile</option>
+        <option>Réseau (switch, routeur)</option>
+        <option>Licences logicielles</option>
+        <option>Imprimantes</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <select id="statusFilter" class="form-select">
+        <option value="">Tous les statuts</option>
+        <option>En service</option>
+        <option>En stock</option>
+        <option>En maintenance</option>
+        <option>Hors service</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
+        <i class="bi bi-arrow-counterclockwise"></i> Réinitialiser
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table mb-0" id="materielsTable">
+      <thead class="table-light">
+        <tr>
+          <th class="ps-4">Matériel</th>
+          <th>Type</th>
+          <th>N° Série</th>
+          <th>Statut</th>
+          <th>Assigné à</th>
+          <th>Garantie</th>
+          <th class="text-center pe-4">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @materiels.each do |materiel| %>
+          <tr>
+            <td class="ps-4">
+              <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon" style="background:#dcfce7; color:#16a34a; width:40px; height:40px; font-size:1rem; border-radius:10px; flex-shrink:0;">
+                  <% icon = case materiel.type_materiel
+                    when "Ordinateurs / Laptops" then "bi-laptop"
+                    when "Serveurs" then "bi-server"
+                    when "Téléphones / Mobile" then "bi-phone"
+                    when "Réseau (switch, routeur)" then "bi-router"
+                    when "Licences logicielles" then "bi-key"
+                    when "Imprimantes" then "bi-printer"
+                    else "bi-pc"
+                    end %>
+                  <i class="bi <%= icon %>"></i>
+                </div>
+                <div>
+                  <div class="fw-semibold" style="font-size:0.9rem;"><%= materiel.nom %></div>
+                  <small class="text-muted"><%= materiel.marque %> <%= materiel.modele %></small>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="badge rounded-pill bg-light text-dark border" style="font-size:0.75rem;">
+                <%= materiel.type_materiel %>
+              </span>
+            </td>
+            <td><code style="font-size:0.8rem;"><%= materiel.numero_serie.present? ? materiel.numero_serie : "—" %></code></td>
+            <td>
+              <% color = case materiel.statut
+                when "En service" then "success"
+                when "En stock" then "primary"
+                when "En maintenance" then "warning"
+                when "Hors service" then "danger"
+                else "secondary"
+                end %>
+              <span class="badge bg-<%= color %> badge-status"><%= materiel.statut %></span>
+            </td>
+            <td>
+              <% if materiel.assigne_a.present? %>
+                <div class="d-flex align-items-center gap-2">
+                  <div style="width:28px; height:28px; background:#dbeafe; color:#2563eb; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:600;">
+                    <%= materiel.assigne_a.first.upcase %>
+                  </div>
+                  <span style="font-size:0.88rem;"><%= materiel.assigne_a %></span>
+                </div>
+              <% else %>
+                <span class="text-muted">—</span>
+              <% end %>
+            </td>
+            <td>
+              <% if materiel.expiration_garantie.present? %>
+                <% if materiel.expiration_garantie < Date.today %>
+                  <span class="text-danger" style="font-size:0.85rem;"><i class="bi bi-x-circle-fill me-1"></i><%= materiel.expiration_garantie.strftime("%d/%m/%Y") %></span>
+                <% elsif materiel.expiration_garantie < 30.days.from_now %>
+                  <span class="text-warning" style="font-size:0.85rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i><%= materiel.expiration_garantie.strftime("%d/%m/%Y") %></span>
+                <% else %>
+                  <span class="text-success" style="font-size:0.85rem;"><i class="bi bi-check-circle-fill me-1"></i><%= materiel.expiration_garantie.strftime("%d/%m/%Y") %></span>
+                <% end %>
+              <% else %>
+                <span class="text-muted">—</span>
+              <% end %>
+            </td>
+            <td class="text-center pe-4">
+              <div class="d-flex gap-1 justify-content-center">
+                <%= link_to materiel, class: "btn btn-sm btn-outline-primary" do %>
+                  <i class="bi bi-eye"></i>
+                <% end %>
+                <%= link_to edit_materiel_path(materiel), class: "btn btn-sm btn-outline-secondary" do %>
+                  <i class="bi bi-pencil"></i>
+                <% end %>
+                <%= link_to materiel, data: { turbo_method: :delete, turbo_confirm: "Supprimer ce matériel ?" }, class: "btn btn-sm btn-outline-danger" do %>
+                  <i class="bi bi-trash"></i>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+        <% if @materiels.empty? %>
+          <tr>
+            <td colspan="7" class="text-center text-muted py-5">
+              <i class="bi bi-inbox" style="font-size:2.5rem; display:block; margin-bottom:10px;"></i>
+              Aucun matériel enregistré
+              <%= link_to "Ajouter un matériel", new_materiel_path, class: "d-block mt-2 text-primary" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  document.getElementById('searchInput').addEventListener('input', filterTable);
+  document.getElementById('typeFilter').addEventListener('change', filterTable);
+  document.getElementById('statusFilter').addEventListener('change', filterTable);
+
+  function filterTable() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const type = document.getElementById('typeFilter').value.toLowerCase();
+    const status = document.getElementById('statusFilter').value.toLowerCase();
+    document.querySelectorAll('#materielsTable tbody tr').forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = (text.includes(search) && text.includes(type) && text.includes(status)) ? '' : 'none';
+    });
+  }
+
+  function resetFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('typeFilter').value = '';
+    document.getElementById('statusFilter').value = '';
+    filterTable();
+  }
+</script>

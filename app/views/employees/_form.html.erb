@@ -1,0 +1,41 @@
+<div class="card p-4">
+  <%= form_with(model: employee, data: { turbo: false }) do |form| %>
+    <% if employee.errors.any? %>
+      <div class="alert alert-danger">
+        <% employee.errors.full_messages.each do |msg| %>
+          <div><i class="bi bi-exclamation-circle"></i> <%= msg %></div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Prénom</label>
+        <%= form.text_field :first_name, class: "form-control", placeholder: "Ex: Abdoul" %>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Nom</label>
+        <%= form.text_field :last_name, class: "form-control", placeholder: "Ex: Barry" %>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Email</label>
+        <%= form.email_field :email, class: "form-control", placeholder: "Ex: abdoul@entreprise.com" %>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Téléphone</label>
+        <%= form.text_field :phone, class: "form-control", placeholder: "Ex: +227 90 00 00 00" %>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Département</label>
+        <%= form.select :department, [
+          "Informatique", "Finance", "RH", "Direction", "Commercial", "Logistique", "Autre"
+        ], { include_blank: "-- Sélectionner --" }, class: "form-select" %>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2 mt-4">
+      <%= form.submit "Enregistrer", class: "btn btn-primary px-4" %>
+      <%= link_to "Annuler", employees_path, class: "btn btn-outline-secondary px-4" %>
+    </div>
+  <% end %>
+</div>

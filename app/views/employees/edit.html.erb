@@ -1,0 +1,13 @@
+<% content_for :page_title, "Modifier Employé" %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h4 class="fw-bold mb-1">Modifier <%= @employee.first_name %> <%= @employee.last_name %></h4>
+    <p class="text-muted mb-0">Mettre à jour les informations de l'employé</p>
+  </div>
+  <%= link_to employees_path, class: "btn btn-outline-secondary" do %>
+    <i class="bi bi-arrow-left"></i> Retour
+  <% end %>
+</div>
+
+<%= render "form", employee: @employee %>

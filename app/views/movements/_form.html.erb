@@ -1,0 +1,43 @@
+<div class="card p-4">
+  <%= form_with(model: movement, data: { turbo: false }) do |form| %>
+    <% if movement.errors.any? %>
+      <div class="alert alert-danger">
+        <% movement.errors.full_messages.each do |msg| %>
+          <div><i class="bi bi-exclamation-circle"></i> <%= msg %></div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Matériel</label>
+        <%= form.collection_select :materiel_id, Materiel.all, :id, :nom,
+          { include_blank: "-- Sélectionner un matériel --" }, class: "form-select" %>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Employé</label>
+        <%= form.collection_select :employee_id, Employee.all, :id, :first_name,
+          { include_blank: "-- Sélectionner un employé --" }, class: "form-select" %>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Action</label>
+        <%= form.select :action, [
+          "Assignation", "Retour", "Transfert", "Maintenance"
+        ], { include_blank: "-- Sélectionner --" }, class: "form-select" %>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Date</label>
+        <%= form.date_field :date, class: "form-control" %>
+      </div>
+      <div class="col-12">
+        <label class="form-label fw-semibold">Notes</label>
+        <%= form.text_area :notes, class: "form-control", rows: 3, placeholder: "Informations supplémentaires..." %>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2 mt-4">
+      <%= form.submit "Enregistrer", class: "btn btn-primary px-4" %>
+      <%= link_to "Annuler", movements_path, class: "btn btn-outline-secondary px-4" %>
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,214 @@
+<% content_for :page_title, "#{@employee.first_name} #{@employee.last_name}" %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div class="d-flex align-items-center gap-3">
+    <div style="width:55px; height:55px; background:linear-gradient(135deg, #16a34a, #15803d); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:1.5rem; font-weight:700;">
+      <%= @employee.first_name.first.upcase %>
+    </div>
+    <div>
+      <h4 class="fw-bold mb-0"><%= @employee.first_name %> <%= @employee.last_name %></h4>
+      <span class="badge bg-light text-dark border"><i class="bi bi-building me-1"></i><%= @employee.department %></span>
+    </div>
+  </div>
+  <div class="d-flex gap-2">
+    <%= link_to edit_employee_path(@employee), class: "btn btn-outline-secondary" do %>
+      <i class="bi bi-pencil"></i> Modifier
+    <% end %>
+    <%= link_to @employee, data: { turbo_method: :delete, turbo_confirm: "Supprimer cet employé ?" }, class: "btn btn-outline-danger" do %>
+      <i class="bi bi-trash"></i> Supprimer
+    <% end %>
+    <%= link_to employees_path, class: "btn btn-outline-primary" do %>
+      <i class="bi bi-arrow-left"></i> Retour
+    <% end %>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-8">
+    <!-- Coordonnées -->
+    <div class="card p-4 mb-4">
+      <h6 class="fw-bold text-muted text-uppercase mb-4" style="font-size:0.75rem; letter-spacing:1px;">
+        <i class="bi bi-person me-2"></i>Coordonnées
+      </h6>
+      <div class="row g-4">
+        <div class="col-md-6">
+          <label class="text-muted d-block" style="font-size:0.78rem;">Email</label>
+          <p class="fw-semibold mb-0 mt-1"><i class="bi bi-envelope text-muted me-2"></i><%= @employee.email.present? ? @employee.email : "—" %></p>
+        </div>
+        <div class="col-md-6">
+          <label class="text-muted d-block" style="font-size:0.78rem;">Téléphone</label>
+          <p class="fw-semibold mb-0 mt-1"><i class="bi bi-telephone text-muted me-2"></i><%= @employee.phone.present? ? @employee.phone : "—" %></p>
+        </div>
+        <div class="col-md-6">
+          <label class="text-muted d-block" style="font-size:0.78rem;">Département</label>
+          <p class="fw-semibold mb-0 mt-1"><i class="bi bi-building text-muted me-2"></i><%= @employee.department.present? ? @employee.department : "—" %></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Matériels assignés -->
+    <div class="card mb-4">
+      <div class="d-flex justify-content-between align-items-center p-4 border-bottom">
+        <h6 class="fw-bold mb-0"><i class="bi bi-laptop me-2"></i>Matériels assignés</h6>
+        <span class="badge bg-light text-dark"><%= @employee.movements.where(action: "Assignation").count %></span>
+      </div>
+      <div class="card-body p-0">
+        <table class="table mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">Matériel</th>
+              <th>Type</th>
+              <th>Statut</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @employee.movements.where(action: "Assignation").order(date: :desc).each do |m| %>
+              <tr>
+                <td class="ps-4">
+                  <div class="fw-semibold" style="font-size:0.88rem;"><%= m.materiel&.nom %></div>
+                  <small class="text-muted"><%= m.materiel&.marque %></small>
+                </td>
+                <td><span class="badge rounded-pill bg-light text-dark border" style="font-size:0.72rem;"><%= m.materiel&.type_materiel %></span></td>
+                <td>
+                  <% color = case m.materiel&.statut
+                    when "En service" then "success"
+                    when "En stock" then "primary"
+                    when "En maintenance" then "warning"
+                    when "Hors service" then "danger"
+                    else "secondary"
+                    end %>
+                  <span class="badge bg-<%= color %>"><%= m.materiel&.statut %></span>
+                </td>
+                <td><small><%= m.date&.strftime("%d/%m/%Y") %></small></td>
+              </tr>
+            <% end %>
+            <% if @employee.movements.where(action: "Assignation").empty? %>
+              <tr><td colspan="4" class="text-center text-muted py-4">
+                <i class="bi bi-inbox d-block mb-2" style="font-size:1.5rem;"></i>Aucun matériel assigné
+              </td></tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Décharges -->
+    <div class="card">
+      <div class="d-flex justify-content-between align-items-center p-4 border-bottom">
+        <h6 class="fw-bold mb-0"><i class="bi bi-file-earmark-text me-2"></i>Décharges</h6>
+        <span class="badge bg-light text-dark"><%= @decharges.count %></span>
+      </div>
+      <div class="card-body p-0">
+        <table class="table mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">Référence</th>
+              <th>Date émission</th>
+              <th>Date signature</th>
+              <th>Statut</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @decharges.each do |d| %>
+              <tr>
+                <td class="ps-4"><code>DECH-<%= @employee.id %>-<%= d.date_emission&.strftime("%Y%m%d") %></code></td>
+                <td><small><%= d.date_emission&.strftime("%d/%m/%Y") %></small></td>
+                <td><small><%= d.date_signature&.strftime("%d/%m/%Y") || "—" %></small></td>
+                <td>
+                  <% color = case d.statut
+                    when "Signé" then "success"
+                    when "En attente de signature" then "warning"
+                    when "Refusé" then "danger"
+                    else "secondary"
+                    end %>
+                  <span class="badge bg-<%= color %> badge-status"><%= d.statut %></span>
+                </td>
+                <td class="text-center">
+                  <% if d.statut != "Signé" %>
+                    <form action="<%= update_statut_decharge_employee_path(@employee) %>" method="post" data-turbo="false" style="display:inline;">
+                      <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+                      <input type="hidden" name="_method" value="patch">
+                      <input type="hidden" name="decharge_id" value="<%= d.id %>">
+                      <input type="hidden" name="statut" value="Signé">
+                      <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Marquer comme signé ?')">
+                        <i class="bi bi-check-lg"></i>
+                      </button>
+                    </form>
+                    <form action="<%= update_statut_decharge_employee_path(@employee) %>" method="post" data-turbo="false" style="display:inline;">
+                      <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+                      <input type="hidden" name="_method" value="patch">
+                      <input type="hidden" name="decharge_id" value="<%= d.id %>">
+                      <input type="hidden" name="statut" value="Refusé">
+                      <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Marquer comme refusé ?')">
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    </form>
+                  <% else %>
+                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Signé</span>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+            <% if @decharges.empty? %>
+              <tr><td colspan="5" class="text-center text-muted py-4">
+                <i class="bi bi-file-earmark d-block mb-2" style="font-size:1.5rem;"></i>Aucune décharge générée
+              </td></tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <!-- Statistiques -->
+    <div class="card p-4 mb-4">
+      <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size:0.75rem; letter-spacing:1px;">
+        <i class="bi bi-bar-chart me-2"></i>Statistiques
+      </h6>
+      <div class="d-flex justify-content-between align-items-center p-3 rounded-3 mb-2" style="background:#dcfce7;">
+        <span style="font-size:0.88rem; color:#15803d;">Matériels assignés</span>
+        <span class="fw-bold" style="color:#15803d;"><%= @employee.movements.where(action: "Assignation").count %></span>
+      </div>
+      <div class="d-flex justify-content-between align-items-center p-3 rounded-3 mb-2" style="background:#dbeafe;">
+        <span style="font-size:0.88rem; color:#1d4ed8;">Retours effectués</span>
+        <span class="fw-bold" style="color:#1d4ed8;"><%= @employee.movements.where(action: "Retour").count %></span>
+      </div>
+      <div class="d-flex justify-content-between align-items-center p-3 rounded-3 mb-2" style="background:#dcfce7;">
+        <span style="font-size:0.88rem; color:#15803d;">Décharges signées</span>
+        <span class="fw-bold" style="color:#15803d;"><%= @decharges.where(statut: "Signé").count %></span>
+      </div>
+      <div class="d-flex justify-content-between align-items-center p-3 rounded-3" style="background:#fef9c3;">
+        <span style="font-size:0.88rem; color:#a16207;">En attente signature</span>
+        <span class="fw-bold" style="color:#a16207;"><%= @decharges.where(statut: "En attente de signature").count %></span>
+      </div>
+    </div>
+
+    <!-- Actions rapides -->
+    <div class="card p-4">
+      <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size:0.75rem; letter-spacing:1px;">
+        <i class="bi bi-lightning me-2"></i>Actions rapides
+      </h6>
+      <%= link_to decharge_employee_path(@employee), class: "btn btn-outline-dark w-100 mb-2" do %>
+        <i class="bi bi-download me-2"></i>Télécharger la décharge
+      <% end %>
+      <form action="<%= envoyer_decharge_employee_path(@employee) %>" method="post" data-turbo="false" class="mb-2">
+        <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+        <button type="submit" class="btn btn-success w-100" onclick="return confirm('Envoyer la décharge par email à <%= @employee.email %> ?')">
+          <i class="bi bi-envelope me-2"></i>Envoyer par email
+        </button>
+      </form>
+      <%= link_to new_movement_path, class: "btn btn-primary w-100 mb-2" do %>
+        <i class="bi bi-arrow-left-right me-2"></i>Enregistrer un mouvement
+      <% end %>
+      <%= link_to edit_employee_path(@employee), class: "btn btn-outline-secondary w-100 mb-2" do %>
+        <i class="bi bi-pencil me-2"></i>Modifier cet employé
+      <% end %>
+      <%= link_to employees_path, class: "btn btn-outline-primary w-100" do %>
+        <i class="bi bi-arrow-left me-2"></i>Retour à la liste
+      <% end %>
+    </div>
+  </div>
+</div>

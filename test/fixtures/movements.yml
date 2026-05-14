@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  asset: one
+  employee: one
+  action: MyString
+  date: 2026-05-11
+  notes: MyText
+
+two:
+  asset: two
+  employee: two
+  action: MyString
+  date: 2026-05-11
+  notes: MyText

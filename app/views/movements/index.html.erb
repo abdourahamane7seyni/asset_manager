@@ -1,0 +1,121 @@
+<% content_for :page_title, "Mouvements" %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h4 class="fw-bold mb-1">Historique des Mouvements</h4>
+    <p class="text-muted mb-0">Suivi des assignations et transferts d'assets</p>
+  </div>
+  <%= link_to movements_path(format: :pdf), class: "btn btn-outline-danger me-2" do %>
+    <i class="bi bi-file-pdf"></i> PDF
+  <% end %>
+  <%= link_to movements_path(format: :xlsx), class: "btn btn-outline-success me-2" do %>
+    <i class="bi bi-file-excel"></i> Excel
+  <% end %>
+  <%= link_to "/movements/new", class: "btn btn-primary" do %>
+    <i class="bi bi-plus-lg"></i> Nouveau Mouvement
+  <% end %>
+</div>
+
+<!-- Recherche -->
+<div class="card mb-4 p-3">
+  <div class="row g-2">
+    <div class="col-md-4">
+      <input type="text" id="searchInput" class="form-control" placeholder="🔍 Rechercher...">
+    </div>
+    <div class="col-md-3">
+      <select id="actionFilter" class="form-select">
+        <option value="">Toutes les actions</option>
+        <option>Assignation</option>
+        <option>Retour</option>
+        <option>Transfert</option>
+        <option>Maintenance</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- Timeline des mouvements -->
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table mb-0" id="movementsTable">
+      <thead class="table-light">
+        <tr>
+          <th class="ps-4">Date</th>
+          <th>Asset</th>
+          <th>Employé</th>
+          <th>Action</th>
+          <th>Notes</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @movements.each do |movement| %>
+          <tr>
+            <td class="ps-4">
+              <div class="fw-semibold"><%= movement.date&.strftime("%d/%m/%Y") %></div>
+              <small class="text-muted"><%= movement.created_at.strftime("%H:%M") %></small>
+            </td>
+            <td>
+              <div class="d-flex align-items-center">
+                <div class="stat-icon me-2" style="background:#e8f4fd; color:#0d6efd; width:35px; height:35px; font-size:0.9rem; border-radius:8px;">
+                  <i class="bi bi-laptop"></i>
+                </div>
+                <span class="fw-semibold"><%= movement.materiel&.nom %></span>
+              </div>
+            </td>
+            <td>
+              <div class="d-flex align-items-center">
+                <div class="stat-icon me-2" style="background:#e8f8f0; color:#198754; width:35px; height:35px; font-size:0.9rem; border-radius:50%;">
+                  <i class="bi bi-person"></i>
+                </div>
+                <%= movement.employee&.first_name %> <%= movement.employee&.last_name %>
+              </div>
+            </td>
+            <td>
+              <% color = case movement.action
+                when "Assignation" then "primary"
+                when "Retour" then "success"
+                when "Transfert" then "warning"
+                when "Maintenance" then "danger"
+                else "secondary"
+                end %>
+              <span class="badge bg-<%= color %> badge-status"><%= movement.action %></span>
+            </td>
+            <td><small class="text-muted"><%= movement.notes.present? ? movement.notes : "—" %></small></td>
+            <td class="text-center">
+              <%= link_to movement, class: "btn btn-sm btn-outline-primary me-1" do %>
+                <i class="bi bi-eye"></i>
+              <% end %>
+              <%= link_to edit_movement_path(movement), class: "btn btn-sm btn-outline-secondary me-1" do %>
+                <i class="bi bi-pencil"></i>
+              <% end %>
+              <%= link_to movement, method: :delete, data: { confirm: "Supprimer ce mouvement ?" }, class: "btn btn-sm btn-outline-danger" do %>
+                <i class="bi bi-trash"></i>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+        <% if @movements.empty? %>
+          <tr><td colspan="6" class="text-center text-muted py-5">
+            <i class="bi bi-arrow-left-right" style="font-size:2rem;"></i>
+            <p class="mt-2">Aucun mouvement enregistré</p>
+          </td></tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  document.getElementById('searchInput').addEventListener('input', filterTable);
+  document.getElementById('actionFilter').addEventListener('change', filterTable);
+
+  function filterTable() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const action = document.getElementById('actionFilter').value.toLowerCase();
+    document.querySelectorAll('#movementsTable tbody tr').forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = (text.includes(search) && text.includes(action)) ? '' : 'none';
+    });
+  }
+</script>

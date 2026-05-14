@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <title>Asset Manager</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <style>
+      :root {
+        --sidebar-width: 260px;
+        --primary: #16a34a;
+        --primary-dark: #15803d;
+        --bg: #f5f6fa;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { background: var(--bg); font-family: 'Segoe UI', sans-serif; }
+
+      /* Sidebar */
+      .sidebar {
+        width: var(--sidebar-width);
+        height: 100vh;
+        position: fixed;
+        top: 0; left: 0;
+        background: #14532d;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.3s ease;
+        overflow-y: auto;
+      }
+      .sidebar.hidden { transform: translateX(-100%); }
+      .sidebar-brand {
+        padding: 24px 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+      }
+      .sidebar-brand .brand-logo {
+        width: 40px; height: 40px;
+        background: var(--primary);
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.2rem; color: white;
+        margin-bottom: 10px;
+      }
+      .sidebar-brand h6 { color: white; font-weight: 700; font-size: 1rem; margin: 0; }
+      .sidebar-brand small { color: rgba(255,255,255,0.4); font-size: 0.75rem; }
+      .sidebar-menu { padding: 16px 12px; flex: 1; }
+      .sidebar-label {
+        color: rgba(255,255,255,0.3);
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 8px 8px 4px;
+        margin-top: 8px;
+      }
+      .sidebar .nav-link {
+        color: rgba(255,255,255,0.6);
+        padding: 10px 12px;
+        border-radius: 10px;
+        margin: 2px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.88rem;
+        transition: all 0.2s;
+      }
+      .sidebar .nav-link i { font-size: 1.1rem; width: 20px; text-align: center; }
+      .sidebar .nav-link:hover { background: rgba(255,255,255,0.08); color: white; }
+      .sidebar .nav-link.active { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(22,163,74,0.4); }
+      .sidebar-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.08); }
+      .user-card {
+        background: rgba(255,255,255,0.06);
+        border-radius: 12px;
+        padding: 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        transition: all 0.2s;
+      }
+      .user-card:hover { background: rgba(255,255,255,0.1); }
+      .user-avatar {
+        width: 36px; height: 36px;
+        background: var(--primary);
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        color: white; font-size: 0.9rem; font-weight: 600;
+        flex-shrink: 0;
+      }
+      .user-info h6 { color: white; font-size: 0.82rem; font-weight: 600; margin: 0; }
+      .user-info small { color: rgba(255,255,255,0.4); font-size: 0.72rem; }
+
+      /* Overlay mobile */
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+      }
+      .sidebar-overlay.active { display: block; }
+
+      /* Main content */
+      .main-content { margin-left: var(--sidebar-width); min-height: 100vh; transition: margin 0.3s; }
+
+      /* Topbar */
+      .topbar {
+        background: white;
+        padding: 14px 20px;
+        border-bottom: 1px solid #e9ecef;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .topbar h5 { font-weight: 700; color: #1e1b4b; margin: 0; font-size: 1rem; }
+      .btn-menu { display: none; background: none; border: none; font-size: 1.4rem; color: #333; cursor: pointer; }
+
+      /* Content area */
+      .content-area { padding: 24px; }
+
+      /* Cards */
+      .card { border: none; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04); }
+      .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+      .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
+
+      /* Buttons */
+      .btn { border-radius: 10px; font-size: 0.88rem; font-weight: 500; }
+      .btn-primary { background: var(--primary); border-color: var(--primary); }
+      .btn-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
+
+      /* Table */
+      .table th { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280; border-bottom: 1px solid #f0f0f0; }
+      .table td { vertical-align: middle; border-bottom: 1px solid #f9f9f9; }
+      .table tbody tr:hover { background: #fafafa; }
+      .table-responsive { overflow-x: auto; }
+
+      /* Badges */
+      .badge { font-weight: 500; letter-spacing: 0.3px; }
+      .badge-status { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; }
+
+      /* Alerts */
+      .alert { border-radius: 12px; border: none; }
+
+      /* Form controls */
+      .form-control, .form-select { border-radius: 10px; border: 1.5px solid #e9ecef; padding: 10px 14px; font-size: 0.9rem; transition: all 0.2s; }
+      .form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(22,163,74,0.1); }
+      .input-group-text { border-radius: 10px 0 0 10px; border: 1.5px solid #e9ecef; background: #f8f9fa; }
+
+      /* Mobile responsive */
+      @media (max-width: 768px) {
+        .sidebar { transform: translateX(-100%); }
+        .sidebar.show { transform: translateX(0); }
+        .main-content { margin-left: 0; }
+        .btn-menu { display: block; }
+        .content-area { padding: 16px; }
+        .topbar { padding: 12px 16px; }
+        .stat-card { padding: 16px; }
+        .table th, .table td { font-size: 0.78rem; padding: 8px; }
+        .d-flex.gap-2 { flex-wrap: wrap; }
+        .btn { font-size: 0.82rem; padding: 6px 12px; }
+        h4.fw-bold { font-size: 1.1rem; }
+        .col-md-3, .col-md-4, .col-md-6, .col-md-7, .col-md-8 { margin-bottom: 12px; }
+      }
+
+      @media (max-width: 576px) {
+        .content-area { padding: 12px; }
+        .card { border-radius: 12px; }
+        .stat-card { border-radius: 12px; }
+        .topbar h5 { font-size: 0.9rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Overlay mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-logo"><i class="bi bi-pc-display-horizontal"></i></div>
+        <h6>Asset Manager</h6>
+        <small>Gestion du parc informatique</small>
+      </div>
+
+      <div class="sidebar-menu">
+        <div class="sidebar-label">Principal</div>
+        <a class="nav-link <%= 'active' if controller_name == 'dashboard' %>" href="/">
+          <i class="bi bi-grid-1x2-fill"></i> Dashboard
+        </a>
+
+        <div class="sidebar-label">Gestion</div>
+        <a class="nav-link <%= 'active' if controller_name == 'materiels' %>" href="/materiels">
+          <i class="bi bi-laptop"></i> Matériels
+        </a>
+        <a class="nav-link <%= 'active' if controller_name == 'employees' %>" href="/employees">
+          <i class="bi bi-people-fill"></i> Employés
+        </a>
+        <a class="nav-link <%= 'active' if controller_name == 'movements' %>" href="/movements">
+          <i class="bi bi-arrow-left-right"></i> Mouvements
+        </a>
+
+        <div class="sidebar-label">Compte</div>
+        <a class="nav-link <%= 'active' if controller_name == 'profile' %>" href="/profile">
+          <i class="bi bi-person-circle"></i> Mon profil
+        </a>
+        <% if user_signed_in? %>
+          <a class="nav-link text-danger" href="/users/sign_out" data-turbo-method="delete">
+            <i class="bi bi-box-arrow-left"></i> Déconnexion
+          </a>
+        <% end %>
+      </div>
+
+      <% if user_signed_in? %>
+        <div class="sidebar-footer">
+          <a href="/profile" class="user-card">
+            <div class="user-avatar"><%= current_user.email.first.upcase %></div>
+            <div class="user-info">
+              <h6><%= current_user.email.split("@").first %></h6>
+              <small>Administrateur</small>
+            </div>
+          </a>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+      <div class="topbar">
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn-menu" onclick="toggleSidebar()">
+            <i class="bi bi-list"></i>
+          </button>
+          <h5><%= content_for?(:page_title) ? yield(:page_title) : "Dashboard" %></h5>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="text-muted small d-none d-md-block">
+            <i class="bi bi-calendar3 me-1"></i><%= Date.today.strftime("%d %B %Y") %>
+          </span>
+        </div>
+      </div>
+
+      <div class="content-area">
+        <% if notice %>
+          <div class="alert alert-success mb-4"><i class="bi bi-check-circle me-2"></i><%= notice %></div>
+        <% end %>
+        <% if alert %>
+          <div class="alert alert-danger mb-4"><i class="bi bi-exclamation-circle me-2"></i><%= alert %></div>
+        <% end %>
+        <%= yield %>
+      </div>
+    </div>
+
+    <script>
+      function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        sidebar.classList.toggle('show');
+        overlay.classList.toggle('active');
+      }
+    </script>
+  </body>
+</html>

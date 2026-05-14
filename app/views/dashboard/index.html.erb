@@ -1,0 +1,228 @@
+<% content_for :page_title, "Dashboard" %>
+
+<!-- Stat cards -->
+<div class="row g-4 mb-4">
+  <div class="col-xl-3 col-md-6">
+    <div class="stat-card">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div class="stat-icon" style="background:#dcfce7; color:#16a34a;">
+          <i class="bi bi-laptop"></i>
+        </div>
+        <span class="badge rounded-pill" style="background:#dcfce7; color:#16a34a; font-size:0.7rem;">Total</span>
+      </div>
+      <h2 class="fw-bold mb-0"><%= @total_materiels %></h2>
+      <p class="text-muted mb-0" style="font-size:0.85rem;">Matériels enregistrés</p>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <div class="stat-card">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div class="stat-icon" style="background:#dbeafe; color:#2563eb;">
+          <i class="bi bi-people-fill"></i>
+        </div>
+        <span class="badge rounded-pill" style="background:#dbeafe; color:#2563eb; font-size:0.7rem;">Total</span>
+      </div>
+      <h2 class="fw-bold mb-0"><%= @total_employes %></h2>
+      <p class="text-muted mb-0" style="font-size:0.85rem;">Employés actifs</p>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <div class="stat-card">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div class="stat-icon" style="background:#fef9c3; color:#ca8a04;">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+        </div>
+        <span class="badge rounded-pill" style="background:#fef9c3; color:#ca8a04; font-size:0.7rem;">Alerte</span>
+      </div>
+      <h2 class="fw-bold mb-0 text-warning"><%= @expirant_bientot.count %></h2>
+      <p class="text-muted mb-0" style="font-size:0.85rem;">Garanties expirant bientôt</p>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <div class="stat-card">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div class="stat-icon" style="background:#fee2e2; color:#dc2626;">
+          <i class="bi bi-x-circle-fill"></i>
+        </div>
+        <span class="badge rounded-pill" style="background:#fee2e2; color:#dc2626; font-size:0.7rem;">Urgent</span>
+      </div>
+      <h2 class="fw-bold mb-0 text-danger"><%= @expires.count %></h2>
+      <p class="text-muted mb-0" style="font-size:0.85rem;">Garanties expirées</p>
+    </div>
+  </div>
+</div>
+
+<!-- Graphiques -->
+<div class="row g-4 mb-4">
+  <div class="col-md-5">
+    <div class="card p-4 h-100">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h6 class="fw-bold mb-0">Matériels par type</h6>
+        <span class="badge bg-light text-dark"><%= @total_materiels %> total</span>
+      </div>
+      <canvas id="typeChart"></canvas>
+    </div>
+  </div>
+  <div class="col-md-7">
+    <div class="card p-4 h-100">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h6 class="fw-bold mb-0">Matériels par statut</h6>
+      </div>
+      <canvas id="statusChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Mouvements récents & Alertes -->
+<div class="row g-4">
+  <div class="col-md-7">
+    <div class="card h-100">
+      <div class="d-flex justify-content-between align-items-center p-4 border-bottom">
+        <h6 class="fw-bold mb-0">Mouvements récents</h6>
+        <%= link_to movements_path, class: "btn btn-sm btn-outline-secondary" do %>
+          Voir tout <i class="bi bi-arrow-right"></i>
+        <% end %>
+      </div>
+      <div class="card-body p-0">
+        <table class="table mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">Matériel</th>
+              <th>Employé</th>
+              <th>Action</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @mouvements_recents.each do |m| %>
+              <tr>
+                <td class="ps-4">
+                  <div class="fw-semibold" style="font-size:0.88rem;"><%= m.materiel&.nom %></div>
+                  <small class="text-muted"><%= m.materiel&.type_materiel %></small>
+                </td>
+                <td>
+                  <div style="font-size:0.88rem;"><%= m.employee&.first_name %> <%= m.employee&.last_name %></div>
+                  <small class="text-muted"><%= m.employee&.department %></small>
+                </td>
+                <td>
+                  <% color = case m.action
+                    when "Assignation" then "success"
+                    when "Retour" then "primary"
+                    when "Transfert" then "warning"
+                    when "Maintenance" then "danger"
+                    else "secondary"
+                    end %>
+                  <span class="badge bg-<%= color %> badge-status"><%= m.action %></span>
+                </td>
+                <td><small><%= m.date&.strftime("%d/%m/%Y") %></small></td>
+              </tr>
+            <% end %>
+            <% if @mouvements_recents.empty? %>
+              <tr><td colspan="4" class="text-center text-muted py-5">
+                <i class="bi bi-inbox" style="font-size:2rem; display:block; margin-bottom:8px;"></i>
+                Aucun mouvement enregistré
+              </td></tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-5">
+    <div class="card h-100">
+      <div class="d-flex justify-content-between align-items-center p-4 border-bottom">
+        <h6 class="fw-bold mb-0"><i class="bi bi-bell-fill text-warning me-2"></i>Alertes garantie</h6>
+        <span class="badge bg-warning text-dark"><%= @expirant_bientot.count + @expires.count %></span>
+      </div>
+      <div class="card-body" style="max-height:350px; overflow-y:auto;">
+        <% if @expires.any? %>
+          <p class="text-muted text-uppercase fw-semibold mb-2" style="font-size:0.7rem; letter-spacing:1px;">Expirées</p>
+          <% @expires.each do |m| %>
+            <div class="d-flex align-items-center mb-3 p-3 rounded-3" style="background:#fff5f5;">
+              <div class="stat-icon me-3" style="background:#fee2e2; color:#dc2626; width:38px; height:38px; font-size:0.9rem; border-radius:10px; flex-shrink:0;">
+                <i class="bi bi-x-circle-fill"></i>
+              </div>
+              <div class="flex-grow-1">
+                <p class="mb-0 fw-semibold" style="font-size:0.88rem;"><%= m.nom %></p>
+                <small class="text-danger">Expirée le <%= m.expiration_garantie&.strftime("%d/%m/%Y") %></small>
+              </div>
+              <%= link_to m, class: "btn btn-sm btn-outline-danger" do %>
+                <i class="bi bi-eye"></i>
+              <% end %>
+            </div>
+          <% end %>
+        <% end %>
+
+        <% if @expirant_bientot.any? %>
+          <p class="text-muted text-uppercase fw-semibold mb-2 mt-3" style="font-size:0.7rem; letter-spacing:1px;">Bientôt</p>
+          <% @expirant_bientot.each do |m| %>
+            <div class="d-flex align-items-center mb-3 p-3 rounded-3" style="background:#fffbeb;">
+              <div class="stat-icon me-3" style="background:#fef9c3; color:#ca8a04; width:38px; height:38px; font-size:0.9rem; border-radius:10px; flex-shrink:0;">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+              </div>
+              <div class="flex-grow-1">
+                <p class="mb-0 fw-semibold" style="font-size:0.88rem;"><%= m.nom %></p>
+                <small class="text-warning">Expire le <%= m.expiration_garantie&.strftime("%d/%m/%Y") %></small>
+              </div>
+              <%= link_to m, class: "btn btn-sm btn-outline-warning" do %>
+                <i class="bi bi-eye"></i>
+              <% end %>
+            </div>
+          <% end %>
+        <% end %>
+
+        <% if @expirant_bientot.empty? && @expires.empty? %>
+          <div class="text-center text-muted py-5">
+            <i class="bi bi-shield-check" style="font-size:2.5rem; color:#16a34a; display:block; margin-bottom:10px;"></i>
+            <p class="mb-0">Toutes les garanties sont à jour !</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const typeCtx = document.getElementById('typeChart').getContext('2d');
+  new Chart(typeCtx, {
+    type: 'doughnut',
+    data: {
+      labels: <%= raw @materiels_par_type.keys.to_json %>,
+      datasets: [{
+        data: <%= raw @materiels_par_type.values.to_json %>,
+        backgroundColor: ['#16a34a','#2563eb','#ca8a04','#dc2626','#0891b2','#7c3aed'],
+        borderWidth: 0,
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      cutout: '70%',
+      plugins: {
+        legend: { position: 'bottom', labels: { padding: 16, font: { size: 12 } } }
+      }
+    }
+  });
+
+  const statusCtx = document.getElementById('statusChart').getContext('2d');
+  new Chart(statusCtx, {
+    type: 'bar',
+    data: {
+      labels: <%= raw @materiels_par_statut.keys.to_json %>,
+      datasets: [{
+        label: 'Matériels',
+        data: <%= raw @materiels_par_statut.values.to_json %>,
+        backgroundColor: ['#16a34a','#2563eb','#ca8a04','#dc2626'],
+        borderRadius: 10,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: '#f0f0f0' }, ticks: { stepSize: 1 } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+</script>
